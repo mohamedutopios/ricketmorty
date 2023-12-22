@@ -79,6 +79,7 @@ characterKeysFiltered.forEach(i => {
 
 // Formatage de la date de création du personnage.
 let characterCreationDate = new Date(characterKeysFiltered.filter(el => el[0] === 'created')[0][1])
+console.log(characterCreationDate);
 characterCreationDate = new Intl.DateTimeFormat('fr-FR', {
   year: "numeric",
   month: "long",

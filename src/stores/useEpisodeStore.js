@@ -6,6 +6,7 @@ import axios from 'axios';
 export const useEpisodeStore = defineStore('episode', () => {
   const episodes = ref([]);
   const isLoading = ref(false);
+  
   const fetchEpisodes = async () => {
     isLoading.value = true;
     try {

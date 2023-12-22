@@ -3,7 +3,7 @@
     id="app"
     class="characters-list text-slate-600"
   >
-  <header v-if="routeName !== 'login'">
+  <header >
       <PageHeader />
     </header>
 
@@ -25,8 +25,5 @@
   import { useRoute } from 'vue-router'
 
   const storeCharacters = useStoreCharacters();
-  //storeCharacters.init();
 
-  const route = useRoute();
-  const routeName = route.name; // Obtient le nom de la route
 </script>

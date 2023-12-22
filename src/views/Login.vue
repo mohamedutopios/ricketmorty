@@ -50,6 +50,7 @@ const email = ref('');
 const password = ref('');
 const router = useRouter();
 const userStore = useUserStore();
+
 const submitForm = async () => {
   try {
     userStore.loginUser(email.value, password.value);
