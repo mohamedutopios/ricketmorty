@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+/* import { defineStore } from 'pinia'
 import { getCharacters } from 'rickmortyapi'
 import filterCategories from '@/mockdata/filterCategories.json'
 
@@ -87,4 +87,334 @@ export const useStoreCharacters = defineStore('storeCharacters', {
         this.getCharacters()
     }
   }
-})
+}) */
+/* import { defineStore } from 'pinia';
+import { getCharacters } from 'rickmortyapi';
+import filterCategories from '@/mockdata/filterCategories.json';
+import { ref, watch } from 'vue';
+
+export const useStoreCharacters = defineStore('storeCharacters', () => {
+  const requestFilters = ref({
+    page: 1,
+  });
+  const filterCategoriesData = ref(filterCategories);
+  const charactersLoading = ref(true);
+  const charactersCount = ref(0);
+  const characterItems = ref([]);
+  const lastPage = ref(1);
+
+  const getFiltersFromSessionStorage = () => {
+    if (!sessionStorage.getItem('page')) {
+      sessionStorage.setItem('page', requestFilters.value.page);
+    } else {
+      const storedFilters = {};
+      storedFilters.page = Number(sessionStorage.getItem('page'));
+      filterCategoriesData.value.forEach(el => {
+        if (sessionStorage.getItem(el.name)) {
+          storedFilters[el.name] = sessionStorage.getItem(el.name);
+        }
+      });
+      requestFilters.value = storedFilters;
+    }
+  };
+
+  const fetchCharacters = async () => {
+    const response = await getCharacters(requestFilters.value);
+    sessionStorage.setItem('page', requestFilters.value.page);
+    if (response.status === 200) {
+      const data = response.data;
+      charactersCount.value = data.info.count;
+      characterItems.value = data.results;
+      lastPage.value = data.info.pages;
+      charactersLoading.value = false;
+    } else {
+      characterItems.value = [];
+      charactersLoading.value = false;
+      charactersCount.value = 0;
+      lastPage.value = 1;
+    }
+  };
+
+  // Initialize store
+  filterCategoriesData.value = filterCategories;
+  getFiltersFromSessionStorage();
+  fetchCharacters();
+
+  // Watchers for reactive changes
+  watch(requestFilters, fetchCharacters);
+
+  return {
+    requestFilters,
+    filterCategoriesData,
+    charactersLoading,
+    charactersCount,
+    characterItems,
+    lastPage,
+    getFiltersFromSessionStorage,
+    fetchCharacters,
+  };
+});
+ */
+
+/* import { defineStore } from 'pinia';
+import { getCharacters } from 'rickmortyapi';
+import filterCategories from '@/mockdata/filterCategories.json';
+import { ref } from 'vue';
+
+export const useStoreCharacters = defineStore('storeCharacters', () => {
+  const requestFilters = ref({ page: 1 });
+  const filterCategoriesData = ref(filterCategories);
+  const charactersLoading = ref(true);
+  const charactersCount = ref(0);
+  const characterItems = ref([]);
+  const lastPage = ref(1);
+
+  const fetchCharacters = async () => {
+    charactersLoading.value = true;
+    const response = await getCharacters(requestFilters.value);
+    if (response.status === 200) {
+      const data = response.data;
+      charactersCount.value = data.info.count;
+      characterItems.value = data.results;
+      lastPage.value = data.info.pages;
+    } else {
+      characterItems.value = [];
+      charactersCount.value = 0;
+      lastPage.value = 1;
+    }
+    charactersLoading.value = false;
+  };
+
+  const resetStoreFilters = () => {
+    requestFilters.value = { page: 1 };
+    sessionStorage.clear();
+    fetchCharacters();
+  };
+
+  const goToPage = (page) => {
+    if (page > 0 && page <= lastPage.value) {
+      requestFilters.value.page = page;
+      fetchCharacters();
+    }
+  };
+
+  const movePage = (page) => {
+    const newPage = requestFilters.value.page + page;
+    if (newPage <= lastPage.value && newPage >= 1) {
+      requestFilters.value.page = newPage;
+      fetchCharacters();
+    }
+  };
+
+  // Initialize store by fetching characters
+  fetchCharacters();
+
+  return {
+    requestFilters,
+    filterCategoriesData,
+    charactersLoading,
+    charactersCount,
+    characterItems,
+    lastPage,
+    resetStoreFilters,
+    goToPage,
+    movePage,
+  };
+}); */
+/* import { defineStore } from 'pinia';
+import filterCategories from '@/mockdata/filterCategories.json';
+import { ref } from 'vue';
+
+export const useStoreCharacters = defineStore('storeCharacters', () => {
+  const requestFilters = ref({ page: 1 });
+  const filterCategoriesData = ref(filterCategories);
+  const charactersLoading = ref(true);
+  const charactersCount = ref(0);
+  const characterItems = ref([]);
+  const lastPage = ref(1);
+
+  const fetchCharacters = async (url)  => {
+    charactersLoading.value = true;
+
+    // Replace this URL with the actual Rick and Morty API endpoint you wish to hit
+    const url = `https://rickandmortyapi.com/api/character/?page=${requestFilters.value.page}`;
+
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        charactersCount.value = data.info.count;
+        characterItems.value = data.results;
+        lastPage.value = data.info.pages;
+      } else {
+        throw new Error('Failed to fetch characters');
+      }
+    } catch (error) {
+      console.error("Error fetching characters:", error);
+      characterItems.value = [];
+      charactersCount.value = 0;
+      lastPage.value = 1;
+    }
+    charactersLoading.value = false;
+  };
+
+
+
+  const setStoreFilters = async (filterName, subFilter) => {
+    // Définition ou suppression du filtre
+    if (subFilter !== 'all' && subFilter !== '') {
+      requestFilters.value.page = 1;
+      requestFilters.value[filterName] = subFilter;
+      sessionStorage.setItem(filterName, subFilter);
+    } else {
+      delete requestFilters.value[filterName];
+      sessionStorage.removeItem(filterName);
+    }
+  
+    // Construction de l'URL pour l'API avec les filtres
+    let query = `?page=${requestFilters.value.page}`;
+    Object.keys(requestFilters.value).forEach((key) => {
+      if (key !== 'page' && requestFilters.value[key]) {
+        query += `&${key}=${encodeURIComponent(requestFilters.value[key])}`;
+      }
+    });
+  
+    const url = `https://rickandmortyapi.com/api/character/${query}`;
+  
+    await fetchCharacters(url); // Mettez à jour fetchCharacters pour accepter l'URL comme paramètre
+  };
+  
+
+  const resetStoreFilters = () => {
+    requestFilters.value = { page: 1 };
+    sessionStorage.clear();
+    fetchCharacters();
+  };
+
+  const goToPage = (page) => {
+    if (page > 0 && page <= lastPage.value) {
+      requestFilters.value.page = page;
+      fetchCharacters();
+    }
+  };
+
+  const movePage = (page) => {
+    const newPage = requestFilters.value.page + page;
+    if (newPage <= lastPage.value && newPage >= 1) {
+      requestFilters.value.page = newPage;
+      fetchCharacters();
+    }
+  };
+
+  // Initialize store by fetching characters
+  fetchCharacters();
+
+  return {
+    requestFilters,
+    filterCategoriesData,
+    charactersLoading,
+    charactersCount,
+    characterItems,
+    lastPage,
+    resetStoreFilters,
+    setStoreFilters,
+    goToPage,
+    movePage,
+  };
+});
+ */
+
+import { defineStore } from 'pinia';
+import filterCategories from '@/mockdata/filterCategories.json';
+import { ref } from 'vue';
+
+export const useStoreCharacters = defineStore('storeCharacters', () => {
+  
+  const requestFilters = ref({ page: 1 });
+  const filterCategoriesData = ref(filterCategories);
+  const charactersLoading = ref(true);
+  const charactersCount = ref(0);
+  const characterItems = ref([]);
+  const lastPage = ref(1);
+
+  const buildURL = () => {
+    let query = `?page=${requestFilters.value.page}`;
+    Object.keys(requestFilters.value).forEach((key) => {
+      if (key !== 'page' && requestFilters.value[key]) {
+        query += `&${key}=${encodeURIComponent(requestFilters.value[key])}`;
+      }
+    });
+    return `https://rickandmortyapi.com/api/character/${query}`;
+  };
+
+  const fetchCharacters = async (url) => {
+    charactersLoading.value = true;
+
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        charactersCount.value = data.info.count;
+        characterItems.value = data.results;
+        lastPage.value = data.info.pages;
+      } else {
+        throw new Error('Failed to fetch characters');
+      }
+    } catch (error) {
+      console.error("Error fetching characters:", error);
+      characterItems.value = [];
+      charactersCount.value = 0;
+      lastPage.value = 1;
+    }
+    charactersLoading.value = false;
+  };
+
+  const setStoreFilters = async (filterName, subFilter) => {
+    if (subFilter !== 'all' && subFilter !== '') {
+      requestFilters.value.page = 1;
+      requestFilters.value[filterName] = subFilter;
+      sessionStorage.setItem(filterName, subFilter);
+    } else {
+      delete requestFilters.value[filterName];
+      sessionStorage.removeItem(filterName);
+    }
+    await fetchCharacters(buildURL());
+  };
+
+  const resetStoreFilters = () => {
+    requestFilters.value = { page: 1 };
+    sessionStorage.clear();
+    fetchCharacters(buildURL());
+  };
+
+  const goToPage = (page) => {
+    if (page > 0 && page <= lastPage.value) {
+      requestFilters.value.page = page;
+      fetchCharacters(buildURL());
+    }
+  };
+
+  const movePage = (page) => {
+    const newPage = requestFilters.value.page + page;
+    if (newPage <= lastPage.value && newPage >= 1) {
+      requestFilters.value.page = newPage;
+      fetchCharacters(buildURL());
+    }
+  };
+
+  // Initialize store by fetching characters with base URL
+  fetchCharacters(buildURL());
+
+  return {
+    requestFilters,
+    filterCategoriesData,
+    charactersLoading,
+    charactersCount,
+    characterItems,
+    lastPage,
+    resetStoreFilters,
+    setStoreFilters,
+    goToPage,
+    movePage,
+  };
+});

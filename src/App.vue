@@ -25,7 +25,7 @@
   import { useRoute } from 'vue-router'
 
   const storeCharacters = useStoreCharacters();
-  storeCharacters.init();
+  //storeCharacters.init();
 
   const route = useRoute();
   const routeName = route.name; // Obtient le nom de la route

@@ -42,9 +42,6 @@ import CharacterItem from '../components/CharacterItem.vue';
   import CharacterFilters from '../components/CharacterFilters.vue'
   import NavigationButtons from '../components/NavigationButtons.vue'
 
-
-
-
  const storeCharacters = useStoreCharacters()
 
 </script>
